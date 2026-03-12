@@ -539,7 +539,7 @@
 
   /* Modal */
   .modal-overlay {
-    display: none; position: fixed; inset: 0; z-index: 300;
+    display: none; position: fixed; inset: 0; z-index: 9500;
     background: rgba(0,0,0,.85); backdrop-filter: blur(4px);
     align-items: center; justify-content: center;
   }
@@ -726,16 +726,6 @@
   <span id="toast-msg"></span>
 </div>
 
-<!-- ORDER DETAIL MODAL -->
-<div class="modal-overlay" id="order-modal">
-  <div class="modal">
-    <h3 id="modal-title">Order Details</h3>
-    <div id="modal-body"></div>
-    <div class="modal-footer">
-      <button class="btn-close" onclick="closeModal()">Close</button>
-    </div>
-  </div>
-</div>
 
 <!-- ADMIN PANEL -->
 <div id="admin-panel">
@@ -748,7 +738,7 @@
         <input type="password" id="admin-pw" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')doLogin()">
       </div>
       <button class="btn-save" style="width:100%; margin-top:8px;" onclick="doLogin()">Access Panel →</button>
-      <p style="margin-top:16px; font-size:.8rem; color:var(--muted); text-align:center;">Bejelentkezés szükséges <strong style="color:var(--accent)">Csókollak</strong></p>
+      <p style="margin-top:16px; font-size:.8rem; color:var(--muted); text-align:center;">Default password: <strong style="color:var(--accent)">admin123</strong></p>
     </div>
   </div>
 
@@ -952,7 +942,7 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ── STATE ──
 let siteData = JSON.parse(localStorage.getItem('qp_site') || 'null') || {
-  adminPass: 'adminqp123',
+  adminPass: 'admin123',
   webhook: '',
   botName: 'Quality Pixels Orders',
   hero: { tag:'Professional Photography Services', title:'Every Pixel|Tells a Story', accent:'Tells a Story', desc:'We craft visual narratives with precision and artistry. From product photography to event coverage — your vision, perfected.' },
@@ -1281,28 +1271,40 @@ function renderAdminOrders() {
 
 function viewOrder(i) {
   const o = orders[i];
-  document.getElementById('modal-title').textContent = 'Order — ' + o.fname + ' ' + o.lname;
-  const filesHtml = (o.file_urls || []).length
+  if (!o) return;
+  document.getElementById('modal-title').textContent = 'Order — ' + (o.fname || '') + ' ' + (o.lname || '');
+
+  const fileUrls = Array.isArray(o.file_urls) ? o.file_urls.filter(Boolean) : [];
+  const filesHtml = fileUrls.length
     ? `<div class="modal-detail"><strong>Attached Files</strong><div class="modal-files">
-        ${o.file_urls.map((url, fi) => {
-          const fname = decodeURIComponent(url.split('/').pop().replace(/^\d+_/, ''));
-          return `<a class="modal-file-badge" href="${url}" target="_blank" download title="Download">⬇ ${fname}</a>`;
+        ${fileUrls.map(url => {
+          // Extract clean filename: strip timestamp prefix added during upload
+          const raw = decodeURIComponent(url.split('/').pop() || url);
+          const cleanName = raw.replace(/^\d+_/, '');
+          return `<a class="modal-file-badge" href="${url}" target="_blank" rel="noopener" title="Open file">⬇ ${cleanName}</a>`;
         }).join('')}
       </div></div>`
-    : '';
+    : '<div class="modal-detail"><strong>Attached Files</strong><p style="color:var(--muted)">No files uploaded</p></div>';
+
   document.getElementById('modal-body').innerHTML = `
-    <div class="modal-detail"><strong>Services</strong><p>${o.service || ''}</p></div>
-    <div class="modal-detail"><strong>Email</strong><p>${o.email}</p></div>
+    <div class="modal-detail"><strong>Services</strong><p>${o.service || '—'}</p></div>
+    <div class="modal-detail"><strong>Email</strong><p>${o.email || '—'}</p></div>
     <div class="modal-detail"><strong>Discord</strong><p>${o.discord || '—'}</p></div>
-    <div class="modal-detail"><strong>Date</strong><p>${o.date || ''}</p></div>
+    <div class="modal-detail"><strong>Date</strong><p>${o.date || o.created_at?.slice(0,10) || '—'}</p></div>
     <div class="modal-detail"><strong>Status</strong><p><span class="status-badge status-${o.status}">${o.status}</span></p></div>
-    <div class="modal-detail"><strong>Description</strong><p>${o.description || ''}</p></div>
+    <div class="modal-detail"><strong>Description</strong><p style="white-space:pre-wrap">${o.description || '—'}</p></div>
     ${filesHtml}
   `;
   document.getElementById('order-modal').classList.add('open');
 }
 
 function closeModal() { document.getElementById('order-modal').classList.remove('open'); }
+document.getElementById('order-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModal();
+});
 
 async function cycleStatus(i) {
   const cycle = ['new', 'progress', 'done'];
@@ -1622,5 +1624,16 @@ renderSite();
 renderPublicGallery();
 setTimeout(setupGalleryDrop, 100);
 </script>
+<!-- ORDER DETAIL MODAL — placed after admin panel so it renders on top -->
+<div class="modal-overlay" id="order-modal">
+  <div class="modal">
+    <h3 id="modal-title">Order Details</h3>
+    <div id="modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn-close" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
