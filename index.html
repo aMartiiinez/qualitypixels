@@ -738,7 +738,7 @@
         <input type="password" id="admin-pw" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')doLogin()">
       </div>
       <button class="btn-save" style="width:100%; margin-top:8px;" onclick="doLogin()">Access Panel →</button>
-      <p style="margin-top:16px; font-size:.8rem; color:var(--muted); text-align:center;">Default password: <strong style="color:var(--accent)">admin123</strong></p>
+      <p style="margin-top:16px; font-size:.8rem; color:var(--muted); text-align:center;">Bejelentkezés <strong style="color:var(--accent)">szükséges</strong></p>
     </div>
   </div>
 
@@ -942,7 +942,7 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ── STATE ──
 let siteData = JSON.parse(localStorage.getItem('qp_site') || 'null') || {
-  adminPass: 'admin123',
+  adminPass: 'adminqp123',
   webhook: '',
   botName: 'Quality Pixels Orders',
   hero: { tag:'Professional Photography Services', title:'Every Pixel|Tells a Story', accent:'Tells a Story', desc:'We craft visual narratives with precision and artistry. From product photography to event coverage — your vision, perfected.' },
