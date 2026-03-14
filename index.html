@@ -792,7 +792,7 @@
         <input type="password" id="admin-pw" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')doLogin()">
       </div>
       <button class="btn-save" style="width:100%; margin-top:8px;" onclick="doLogin()">Belépés →</button>
-      <p style="margin-top:16px; font-size:.8rem; color:var(--muted); text-align:center;">Alapértelmezett jelszó: <strong style="color:var(--accent)">admin123</strong></p>
+      <p style="margin-top:16px; font-size:.8rem; color:var(--muted); text-align:center;">Bejelentkezés <strong style="color:var(--accent)">szükséges</strong></p>
     </div>
   </div>
 
@@ -1190,7 +1190,7 @@ const DEFAULT_SITE_DATA = {
 
 let siteData = { ...DEFAULT_SITE_DATA };
 // adminPass csak localStorage-ban
-let _adminPass = localStorage.getItem('qp_adminpass') || 'admin123';
+let _adminPass = localStorage.getItem('qp_adminpass') || 'asdqwertzu';
 Object.defineProperty(siteData, 'adminPass', {
   get() { return _adminPass; },
   set(v) { _adminPass = v; localStorage.setItem('qp_adminpass', v); }
